@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Questões BNCC - V3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px;
+        }
+
+        .main-card {
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .result-header h2 {
+            margin-bottom: 5px;
+        }
+
+        .questao-content {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .alternativas {
+            margin: 25px 0;
+        }
+
+        .alternativa {
+            padding: 12px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .gabarito-box {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .resolucao-box {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .resolucao-box h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .meta-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.6em;
+            }
+            
+            .main-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Gerador de Questões BNCC</h1>
+            <p>Sistema RAG + Multiagentes - Versão 3 Otimizada</p>
+            <div style="margin-top: 15px;">
+                <span class="badge">4 Agentes Especializados</span>
+                <span class="badge">Validação Matemática</span>
+                <span class="badge">IA Local</span>
+            </div>
+        </div>
+
+        <div class="main-card">
+            <div class="form-group">
+                <label for="habilidade">📋 Selecione a Habilidade BNCC:</label>
+                <select id="habilidade">
+                    <option value="">Carregando...</option>
+                </select>
+            </div>
+
+            <button class="btn" id="gerarBtn" onclick="gerarQuestao()">
+                🚀 Gerar Questão
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="font-size: 1.1em; font-weight: 600;">Gerando questão...</p>
+                <p style="color: #666; margin-top: 10px;">Isso pode levar 30-40 segundos</p>
+                <p style="color: #999; font-size: 0.9em; margin-top: 10px;">
+                    Contexto → Cálculo → Alternativas → Validação
+                </p>
+            </div>
+        </div>
+
+        <div class="result" id="result">
+            <div class="result-header">
+                <h2>✅ Questão Gerada</h2>
+                <p id="metaInfo"></p>
+            </div>
+
+            <div class="meta-info" id="habilidadeInfo"></div>
+
+            <div class="questao-content" id="enunciado"></div>
+
+            <div class="alternativas">
+                <h3>Alternativas:</h3>
+                <div class="alternativa" id="altA"></div>
+                <div class="alternativa" id="altB"></div>
+                <div class="alternativa" id="altC"></div>
+                <div class="alternativa" id="altD"></div>
+            </div>
+
+            <div class="gabarito-box" id="gabarito"></div>
+
+            <div class="resolucao-box">
+                <h3>💡 Resolução:</h3>
+                <div id="resolucao"></div>
+            </div>
+
+            <button class="btn" onclick="gerarNova()" style="margin-top: 20px;">
+                🔄 Gerar Nova Questão
+            </button>
+        </div>
+
+        <div class="error" id="error">
+            <strong>❌ Erro:</strong>
+            <p id="errorMessage"></p>
+        </div>
+
+        <div class="footer">
+            <p><strong>TCC - Engenharia da Computação</strong></p>
+            <p style="margin-top: 5px;">
+                RAG + 4 Multiagentes | Ollama (Llama 3.1 8B) | Python + Flask
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Carregar habilidades
+        async function carregarHabilidades() {
+            try {
+                const response = await fetch('/api/habilidades');
+                const habilidades = await response.json();
+                
+                const select = document.getElementById('habilidade');
+                select.innerHTML = '<option value="">-- Escolha uma habilidade --</option>';
+                
+                for (const [codigo, info] of Object.entries(habilidades)) {
+                    const option = document.createElement('option');
+                    option.value = codigo;
+                    option.textContent = `${codigo} - ${info.tema}`;
+                    select.appendChild(option);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar habilidades:', error);
+                document.getElementById('habilidade').innerHTML = 
+                    '<option value="">Erro ao carregar</option>';
+            }
+        }
+
+        // Gerar questão
+        async function gerarQuestao() {
+            const codigoBncc = document.getElementById('habilidade').value;
+            
+            if (!codigoBncc) {
+                alert('Por favor, selecione uma habilidade BNCC');
+                return;
+            }
+
+            // UI: Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('gerarBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/gerar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ codigo_bncc: codigoBncc })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'sucesso') {
+                    mostrarResultado(data);
+                } else {
+                    mostrarErro(data.mensagem || 'Erro ao gerar questão');
+                }
+            } catch (error) {
+                mostrarErro('Erro de conexão: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('gerarBtn').disabled = false;
+            }
+        }
+
+        // Mostrar resultado
+        function mostrarResultado(data) {
+            // Meta info
+            document.getElementById('metaInfo').textContent = 
+                `Aprovada em ${data.tentativas} tentativa(s)`;
+            
+            // Habilidade
+            document.getElementById('habilidadeInfo').innerHTML = `
+                <strong>Código:</strong> ${data.codigo_bncc}<br>
+                <strong>Tema:</strong> ${data.habilidade.tema}<br>
+                <strong>Ano:</strong> ${data.habilidade.ano}<br>
+                <strong>Descrição:</strong> ${data.habilidade.descricao}
+            `;
+
+            // Enunciado
+            document.getElementById('enunciado').textContent = data.enunciado;
+
+            // Alternativas
+            const alt = data.alternativas;
+            document.getElementById('altA').textContent = 'A) ' + alt.A;
+            document.getElementById('altB').textContent = 'B) ' + alt.B;
+            document.getElementById('altC').textContent = 'C) ' + alt.C;
+            document.getElementById('altD').textContent = 'D) ' + alt.D;
+
+            // Gabarito
+            document.getElementById('gabarito').textContent = 
+                `✅ Gabarito: ${alt.gabarito}) ${alt[alt.gabarito]}`;
+
+            // Resolução
+            document.getElementById('resolucao').innerHTML = 
+                data.resolucao.replace(/\n/g, '<br>');
+
+            // Mostrar resultado
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Mostrar erro
+        function mostrarErro(mensagem) {
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('errorMessage').textContent = mensagem;
+            document.getElementById('error').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Gerar nova
+        function gerarNova() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        // Inicializar
+        carregarHabilidades();
+    </script>
+</body>
+</html>
