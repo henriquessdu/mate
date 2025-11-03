@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <h1>🎓 Gerador de Questões BNCC</h1>
-            <p>Sistema RAG + Multiagentes - Versão 3 Otimizada</p>
+            <p>Sistema RAG + Multiagentes - Versão 3 Refatorada</p>
             <div style="margin-top: 15px;">
                 <span class="badge">4 Agentes Especializados</span>
                 <span class="badge">Validação Matemática</span>
@@ -319,7 +319,9 @@
                 for (const [codigo, info] of Object.entries(habilidades)) {
                     const option = document.createElement('option');
                     option.value = codigo;
-                    option.textContent = `${codigo} - ${info.tema}`;
+                    // CORRIGIDO: usa 'eixo' ao invés de 'tema'
+                    const descricaoBreve = info.descricao.substring(0, 60) + '...';
+                    option.textContent = `${codigo} - ${info.eixo} - ${info.ano}`;
                     select.appendChild(option);
                 }
             } catch (error) {
@@ -374,10 +376,10 @@
             document.getElementById('metaInfo').textContent = 
                 `Aprovada em ${data.tentativas} tentativa(s)`;
             
-            // Habilidade
+            // Habilidade - CORRIGIDO: usa campos corretos
             document.getElementById('habilidadeInfo').innerHTML = `
                 <strong>Código:</strong> ${data.codigo_bncc}<br>
-                <strong>Tema:</strong> ${data.habilidade.tema}<br>
+                <strong>Eixo:</strong> ${data.habilidade.eixo}<br>
                 <strong>Ano:</strong> ${data.habilidade.ano}<br>
                 <strong>Descrição:</strong> ${data.habilidade.descricao}
             `;

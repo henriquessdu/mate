@@ -1,15 +1,49 @@
+"""
+Agente Calculador - Resolve questões matemáticas e gera resolução passo a passo.
+"""
+
 import json
 import re
-from typing import Dict, List
+from typing import Dict
+import sys
+from pathlib import Path
+
+# Adiciona pasta pai ao path para importar utils
+sys.path.append(str(Path(__file__).parent.parent))
+from utils import clean_json_markdown
+
 
 class AgenteCalculador:
+    """
+    Resolve questões matemáticas e gera resolução passo a passo.
+    
+    Recebe enunciado e retorna resposta correta com cálculos detalhados.
+    """
     
     def __init__(self, llm):
-        # Modelo em modo JSON é ideal aqui
+        """
+        Inicializa o agente calculador.
+        
+        Args:
+            llm: Modelo LLM configurado (preferencialmente com format="json")
+        """
         self.llm = llm
     
     def calcular_resposta(self, enunciado: str, habilidade: Dict) -> Dict:
-        # --- PROMPT ATUALIZADO ---
+        """
+        Calcula a resposta para uma questão matemática.
+        
+        Args:
+            enunciado: Texto da questão
+            habilidade: Dicionário com informações da habilidade BNCC
+            
+        Returns:
+            Dict com 'resolucao' (str) e 'resposta_correta' (str)
+            
+        Raises:
+            ValueError: Se JSON retornado for inválido
+            json.JSONDecodeError: Se não conseguir parsear resposta
+        """
         prompt = f"""Resolva a questão de matemática apresentada abaixo.
 
 ENUNCIADO: {enunciado}
@@ -19,7 +53,7 @@ Regras obrigatórias:
 - Retorne os passos como uma LISTA de strings, cada uma iniciando com "Passo X:".
 - Seja claro e sequencial; inclua os cálculos relevantes NOS PASSOS.
 - Informe a "resposta_correta" com o valor exato e a unidade apropriada (ex.: "0,875 litro(s)" ou "7/8 litro(s)").
-- Não adicione comentários fora do JSON.
+- NÃO adicione comentários fora do JSON.
 
 Formato de saída esperado:
 {{
@@ -31,31 +65,24 @@ Formato de saída esperado:
   "resposta_correta": "..."
 }}
 """
-        # --- FIM DO PROMPT ATUALIZADO ---
 
         resposta = self.llm.invoke(prompt)
         texto_json = getattr(resposta, 'content', str(resposta))
 
         try:
-            # limpar cercas de markdown, se houver
-            t = texto_json.strip()
-            if t.startswith("```json"):
-                t = t[7:]
-            if t.endswith("```"):
-                t = t[:-3]
-
+            # Limpar cercas de markdown, se houver
+            t = clean_json_markdown(texto_json)
             dados = json.loads(t)
 
-            # validações mínimas
+            # Validações mínimas
             if "resolucao_passos" not in dados or "resposta_correta" not in dados:
                 raise ValueError("JSON de saída não contém 'resolucao_passos' ou 'resposta_correta'.")
 
             if not isinstance(dados["resolucao_passos"], list) or not all(isinstance(x, str) for x in dados["resolucao_passos"]):
                 raise ValueError("'resolucao_passos' deve ser uma lista de strings.")
 
-            # saneamento: remove vazios e normaliza "Passo X:"
+            # Saneamento: remove vazios e normaliza "Passo X:"
             passos = [p.strip() for p in dados["resolucao_passos"] if p and p.strip()]
-            # (opcional) garante prefixo "Passo i:"
             passos_norm = []
             for i, p in enumerate(passos, 1):
                 if not re.match(r'^\s*Passo\s*\d+\s*:', p, flags=re.I):
@@ -65,13 +92,11 @@ Formato de saída esperado:
             # Garante que o retorno seja uma string limpa
             resposta_final = str(dados["resposta_correta"]).strip()
 
-            # --- CHECK DE SEGURANÇA (OPCIONAL) ---
-            # Se ainda assim o LLM incluir um "=", pegamos só a parte final
+            # Check de segurança: remove "=" se presente (erro comum do LLM)
             if '=' in resposta_final:
                 print("  ⚠️  Aviso (AgenteCalculador): LLM incluiu '='. Limpando a resposta.")
                 partes = resposta_final.split('=')
                 resposta_final = partes[-1].strip()
-            # --- FIM DO CHECK ---
 
             return {
                 "resolucao": "\n".join(passos_norm),

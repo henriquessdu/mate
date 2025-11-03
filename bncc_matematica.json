@@ -22,5 +22,17 @@
     "descricao": "Resolver e elaborar problemas que envolvam adição ou subtração com números racionais positivos na representação fracionária.",
     "ano": "6º ano",
     "eixo": "Números"
+  },
+  "EF06MA12": {
+    "codigo": "EF06MA12",
+    "descricao": "Fazer estimativas de quantidades e aproximar números para múltiplos da potência de 10 mais próxima.",
+    "ano": "6º ano",
+    "eixo": "Números"
+  },
+"EF07MA01": {
+    "codigo": "EF07MA01",
+    "descricao": "Resolver e elaborar problemas com números naturais, envolvendo as noções de divisor e de múltiplo, podendo incluir máximo divisor comum ou mínimo múltiplo comum, por meio de estratégias diversas, sem a aplicação de algoritmos.",
+    "ano": "7º ano",
+    "eixo": "Números"
   }
 }

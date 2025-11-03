@@ -1,68 +1,52 @@
+"""
+Agente Alternativas - Gera alternativas erradas (distratores) plausíveis.
+"""
+
 import re
-import json  # Importado
+import json
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
+import sys
+from pathlib import Path
+
+# Adiciona pasta pai ao path para importar utils
+sys.path.append(str(Path(__file__).parent.parent))
+from utils import normalize_space, split_value_unit, same_value, perturb_value, clean_json_markdown
+
 
 class AgenteAlternativas:
+    """
+    Gera alternativas de múltipla escolha com distratores plausíveis.
+    
+    Usa LLM para gerar distratores e fallback matemático se necessário.
+    """
+    
     def __init__(self, llm, seed: Optional[int] = None):
+        """
+        Inicializa o agente de alternativas.
+        
+        Args:
+            llm: Modelo LLM configurado
+            seed: Seed para reprodutibilidade do embaralhamento (opcional)
+        """
         self.llm = llm
         self.seed = seed
-        # Cria uma instância de Random isolada para não afetar o estado global
         self.rng = random.Random()
         if self.seed is not None:
             self.rng.seed(self.seed)
 
-    # --- utils bem leves ---
-    # (Idealmente, movidos para um utils.py, mas mantidos aqui pela completude)
-    @staticmethod
-    def _normalize(s: str) -> str:
-        return re.sub(r'\s+', ' ', (s or '').strip()).lower()
-
-    @staticmethod
-    def _split_value_unit(texto: str) -> Tuple[str, str]:
-        t = (texto or '').strip()
-        m = re.search(r'([-+]?\d+(?:[.,]\d+)?|\d+\/\d+)', t)
-        if not m:
-            return t, ""
-        num = m.group(1)
-        uni = (t[m.end():]).strip(" .")
-        return num, uni
-
-    @staticmethod
-    def _same_value(a: str, b: str) -> bool:
-        # comparação simples por texto normalizado
-        return AgenteAlternativas._normalize(a) == AgenteAlternativas._normalize(b)
-
-    @staticmethod
-    def _perturb(valor: str, unidade: str, delta: float) -> str:
-        # gera um número próximo preservando estilo básico
-        if re.fullmatch(r'\d+\/\d+', valor):
-            # se vier fração, converte para float e aplica delta (retorna decimal simples)
-            n, d = valor.split('/')
-            try:
-                base = float(n) / float(d)
-                var = base * (1 + delta)
-            except:
-                return f"{valor} {unidade}".strip()
-            texto = f"{var:.3f}".rstrip('0').rstrip('.')
-            texto = texto.replace('.', ',')  # favorece pt-br
-            return f"{texto} {unidade}".strip()
-        try:
-            estilo_virgula = (',' in valor and '.' not in valor)
-            base = float(valor.replace(',', '.'))
-            var = base * (1 + delta)
-            texto = f"{var:.3f}".rstrip('0').rstrip('.')
-            if estilo_virgula:
-                texto = texto.replace('.', ',')
-            return f"{texto} {unidade}".strip()
-        except:
-            # não deu pra perturbar, devolve igual (será filtrado)
-            return f"{valor} {unidade}".strip()
-
     def criar_alternativas(self, enunciado: str, resposta_correta: str, habilidade: Dict) -> Dict:
-
-        # --- PROMPT ATUALIZADO ---
-        # Pede explicitamente um JSON com a chave "distratores"
+        """
+        Cria 4 alternativas (A, B, C, D) sendo 1 correta e 3 distratores.
+        
+        Args:
+            enunciado: Texto da questão
+            resposta_correta: Resposta correta calculada
+            habilidade: Dict com informações BNCC
+            
+        Returns:
+            Dict com chaves 'A', 'B', 'C', 'D' e 'gabarito'
+        """
         prompt = f"""
 Você é um gerador de alternativas de múltipla escolha.
 
@@ -90,97 +74,82 @@ EXEMPLO DE SAÍDA (apenas JSON):
 }}
 """.strip()
 
-        # --- LÓGICA DE PARSING ATUALIZADA ---
+        # Tenta obter distratores do LLM
         linhas = []
         try:
             resp = self.llm.invoke(prompt)
             texto = getattr(resp, "content", str(resp))
             
-            # Limpeza básica de markdown (caso o LLM ignore o 'format=json')
-            t = texto.strip()
-            if t.startswith("```json"):
-                t = t[7:]
-            if t.endswith("```"):
-                t = t[:-3]
-            
+            t = clean_json_markdown(texto)
             dados = json.loads(t)
             
             if isinstance(dados.get("distratores"), list):
-                # Limpa os valores recebidos
                 linhas = [str(d).strip(" -•\t") for d in dados["distratores"]]
             else:
                 raise ValueError("Chave 'distratores' ausente ou não é uma lista.")
 
         except (json.JSONDecodeError, ValueError, AttributeError) as e:
-            # Se o LLM falhar (JSON inválido, etc.), 'linhas' continuará vazia
-            # e o código de fallback será acionado.
             print(f"  ⚠️  Aviso (AgenteAlternativas): Falha ao parsear JSON do LLM. Acionando fallback. Erro: {e}")
-            linhas = [] # Garante que está vazia para o fallback
+            linhas = []
 
-        # --- LÓGICA DE FILTRAGEM E FALLBACK (SE MANTÉM) ---
-
-        # remove duplicatas, remove iguais à correta
+        # Filtra duplicatas e valores iguais à correta
         vistas = set()
         alts = []
         for l in linhas:
-            if self._same_value(l, resposta_correta):
+            if same_value(l, resposta_correta):
                 continue
-            key = self._normalize(l)
+            key = normalize_space(l)
             if key and key not in vistas:
                 vistas.add(key)
                 alts.append(l)
             if len(alts) == 3:
                 break
 
-        # completa com backups, se necessário
+        # Completa com fallback se necessário
         if len(alts) < 3:
             print(f"  ⚙️  Fallback (AgenteAlternativas): Gerando {3 - len(alts)} alternativa(s) por perturbação.")
-            val, uni = self._split_value_unit(resposta_correta)
+            val, uni = split_value_unit(resposta_correta)
             
-            # Lista de deltas para perturbação
             deltas = [0.10, -0.10, 0.25, -0.25, 0.05, -0.05, 0.50, -0.50]
+            
+            # Se for fração, adiciona deltas baseados no denominador
             if '/' in val:
                 try:
                     n_str, d_str = val.split('/')
                     d = float(d_str)
                     if d != 0:
-                        deltas.extend([1.0/d, -1.0/d]) # Adiciona deltas baseados no denominador
+                        deltas.extend([1.0/d, -1.0/d])
                 except:
-                    pass # ignora se a fração for inválida
+                    pass
             
             for delta in deltas:
                 if len(alts) == 3:
                     break
-                sug = self._perturb(val, uni, delta)
-                if not self._same_value(sug, resposta_correta) and self._normalize(sug) not in vistas:
-                    vistas.add(self._normalize(sug))
+                sug = perturb_value(val, uni, delta)
+                if not same_value(sug, resposta_correta) and normalize_space(sug) not in vistas:
+                    vistas.add(normalize_space(sug))
                     alts.append(sug)
 
-        # se ainda faltar (caso extremo), preenche com placeholders
+        # Preenche com placeholders se ainda faltar
         while len(alts) < 3:
-            val, uni = self._split_value_unit(resposta_correta)
-            # Gera um placeholder que tem menos chance de colidir
-            placeholder = self._perturb(val, uni, (len(alts) + 1) * 0.33) 
-            if not self._same_value(placeholder, resposta_correta) and self._normalize(placeholder) not in vistas:
-                 vistas.add(self._normalize(placeholder))
-                 alts.append(placeholder)
+            val, uni = split_value_unit(resposta_correta)
+            placeholder = perturb_value(val, uni, (len(alts) + 1) * 0.33)
+            if not same_value(placeholder, resposta_correta) and normalize_space(placeholder) not in vistas:
+                vistas.add(normalize_space(placeholder))
+                alts.append(placeholder)
             else:
-                # Fallback final se o _perturb falhar
                 alts.append(f"Valor {len(alts)+1}")
 
-
-        # monta A-D embaralhado
+        # Monta A-D embaralhado
         todas = [resposta_correta] + alts[:3]
-        
-        # --- SHUFFLE ATUALIZADO ---
         self.rng.shuffle(todas)
 
         letras = ['A', 'B', 'C', 'D']
         resultado = {letras[i]: todas[i] for i in range(4)}
         
-        # gabarito
+        # Define gabarito
         for i, v in enumerate(todas):
-            if self._same_value(v, resposta_correta):
+            if same_value(v, resposta_correta):
                 resultado["gabarito"] = letras[i]
                 break
                 
