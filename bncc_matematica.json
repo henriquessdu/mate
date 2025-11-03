@@ -3,28 +3,24 @@
     "codigo": "EF06MA07",
     "descricao": "Compreender, comparar e ordenar frações associadas às ideias de partes de inteiros e resultado de divisão, identificando frações equivalentes.",
     "ano": "6º ano",
-    "eixo": "Números",
-    "tema": "Frações - compreensão e equivalência"
+    "eixo": "Números"
   },
   "EF06MA08": {
     "codigo": "EF06MA08",
     "descricao": "Reconhecer que os números racionais positivos podem ser expressos nas formas fracionária e decimal, estabelecer relações entre essas representações, passando de uma representação para outra, e relacioná-los a pontos na reta numérica.",
     "ano": "6º ano",
-    "eixo": "Números",
-    "tema": "Números racionais - representações"
+    "eixo": "Números"
   },
   "EF06MA09": {
     "codigo": "EF06MA09",
     "descricao": "Resolver e elaborar problemas que envolvam o cálculo da fração de uma quantidade e cujo resultado seja um número natural, com e sem uso de calculadora.",
     "ano": "6º ano",
-    "eixo": "Números",
-    "tema": "Frações - cálculo de quantidades"
+    "eixo": "Números"
   },
   "EF06MA10": {
     "codigo": "EF06MA10",
     "descricao": "Resolver e elaborar problemas que envolvam adição ou subtração com números racionais positivos na representação fracionária.",
     "ano": "6º ano",
-    "eixo": "Números",
-    "tema": "Operações com frações"
+    "eixo": "Números"
   }
 }
