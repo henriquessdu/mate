@@ -1,13 +1,7 @@
 {
-  "EF06MA07": {
-    "codigo": "EF06MA07",
-    "descricao": "Compreender, comparar e ordenar frações associadas às ideias de partes de inteiros e resultado de divisão, identificando frações equivalentes.",
-    "ano": "6º ano",
-    "eixo": "Números"
-  },
-  "EF06MA08": {
-    "codigo": "EF06MA08",
-    "descricao": "Reconhecer que os números racionais positivos podem ser expressos nas formas fracionária e decimal, estabelecer relações entre essas representações, passando de uma representação para outra, e relacioná-los a pontos na reta numérica.",
+  "EF06MA03": {
+    "codigo": "EF06MA03",
+    "descricao": "Resolver e elaborar problemas que envolvam cálculos (mentais ou escritos, exatos ou aproximados) com números naturais, por meio de estratégias variadas, com compreensão dos processos neles envolvidos com e sem uso de calculadora.",
     "ano": "6º ano",
     "eixo": "Números"
   },
@@ -17,22 +11,22 @@
     "ano": "6º ano",
     "eixo": "Números"
   },
-  "EF06MA10": {
-    "codigo": "EF06MA10",
-    "descricao": "Resolver e elaborar problemas que envolvam adição ou subtração com números racionais positivos na representação fracionária.",
-    "ano": "6º ano",
-    "eixo": "Números"
-  },
-  "EF06MA12": {
-    "codigo": "EF06MA12",
-    "descricao": "Fazer estimativas de quantidades e aproximar números para múltiplos da potência de 10 mais próxima.",
-    "ano": "6º ano",
-    "eixo": "Números"
-  },
-"EF07MA01": {
-    "codigo": "EF07MA01",
-    "descricao": "Resolver e elaborar problemas com números naturais, envolvendo as noções de divisor e de múltiplo, podendo incluir máximo divisor comum ou mínimo múltiplo comum, por meio de estratégias diversas, sem a aplicação de algoritmos.",
+  "EF07MA02": {
+    "codigo": "EF07MA02",
+    "descricao": "Resolver e elaborar problemas que envolvam porcentagens, como os que lidam com acréscimos e decréscimos simples, utilizando estratégias pessoais, cálculo mental e calculadora, no contexto de educação financeira, entre outros.",
     "ano": "7º ano",
+    "eixo": "Números"
+  },
+  "EF07MA18": {
+    "codigo": "EF07MA18",
+    "descricao": "Resolver e elaborar problemas que possam ser representados por equações polinomiais de 1º grau, redutíveis à forma ax + b = c, fazendo uso das propriedades da igualdade.",
+    "ano": "7º ano",
+    "eixo": "Álgebra"
+  },
+  "EF08MA02": {
+    "codigo": "EF08MA02",
+    "descricao": "Resolver e elaborar problemas usando a relação entre potenciação e radiciação, para representar uma raiz como potência de expoente fracionário.",
+    "ano": "8º ano",
     "eixo": "Números"
   }
 }
