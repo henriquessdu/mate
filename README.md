@@ -4,7 +4,7 @@ Sistema multiagentes inteligente para geração automática de questões de mate
 
 ## 🎯 Sobre o Projeto
 
-O MATE utiliza técnicas de Inteligência Artificial e arquitetura multiagentes para criar questões de matemática contextualizadas, com resolução passo a passo e alternativas plausíveis. O sistema opera completamente local usando Ollama e o modelo LLaMA 3.1 8B.
+A Mate utiliza técnicas de Inteligência Artificial e arquitetura multiagentes para criar questões de matemática contextualizadas, com resolução passo a passo e alternativas plausíveis. O sistema opera completamente local usando Ollama e o modelo LLaMA 3.1 8B.
 
 ### Características Principais
 
@@ -22,23 +22,22 @@ O MATE utiliza técnicas de Inteligência Artificial e arquitetura multiagentes 
 O sistema é composto por 4 agentes especializados que trabalham em pipeline:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     SISTEMA MATE                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  1️⃣  Agente Contextualizador                                 │
-│      └─> Cria enunciado contextualizado                      │
-│                                                               │
-│  2️⃣  Agente Calculador                                        │
-│      └─> Resolve e gera resolução passo a passo             │
-│                                                               │
-│  3️⃣  Agente Alternativas                                      │
-│      └─> Gera distratores plausíveis (A, B, C, D)           │
-│                                                               │
-│  4️⃣  Agente Revisor                                           │
-│      └─> Valida questão completa e aprova/reprova           │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│   SISTEMA MATE                                      │
+└─────────────────────────────────────────────────────┘
+                                                
+   1️⃣  Agente Contextualizador                               
+       └─> Cria enunciado contextualizado                     
+                                                              
+   2️⃣  Agente Calculador                                      
+       └─> Resolve e gera resolução passo a passo             
+                                                               
+   3️⃣  Agente Alternativas                                    
+       └─> Gera distratores plausíveis (A, B, C, D)            
+                                                                
+  4️⃣  Agente Revisor                                         
+      └─> Valida questão completa e aprova/reprova            
+                                                             
 ```
 
 ### Fluxo de Geração
