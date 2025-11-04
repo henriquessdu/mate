@@ -225,11 +225,3 @@ Edite `bncc_matematica.json`:
   }
 }
 ```
-
-## 📝 Licença
-
-Este projeto foi desenvolvido como Trabalho de Conclusão de Curso (TCC) para fins acadêmicos.
-
-## 👨‍💻 Autor
-
-Desenvolvido como parte do TCC: **"Aplicação de Inteligência Artificial na Criação de Questões de Matemática para o Ensino Básico"**
