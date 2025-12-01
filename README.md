@@ -225,3 +225,21 @@ Edite `bncc_matematica.json`:
   }
 }
 ```
+
+## 📚 Trabalho Acadêmico
+
+Este sistema foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC) em Engenharia de Computação:
+
+**Título:** Aplicação de Inteligência Artificial na Criação de Questões de Matemática para o Ensino Básico
+
+**Autor:** Henrique Salles Souza Duarte
+
+**Instituição:** Centro Universitário Facens
+
+**Ano:** 2025
+
+**Orientador:** Prof. Allan Marconato Marum
+
+## 📄 Licença
+
+Este projeto está licenciado sob a **Licença MIT** - veja o arquivo [LICENSE](LICENSE) para detalhes.
